@@ -123,7 +123,7 @@ void Game::NewPipe() {
   Pipe &new_pipe = pipes_[pipe_count_++];
   new_pipe.x = width_ - 0.5;
   int h = rand() % (kLengthR - kLengthL + 1) + kLengthL;
-  new_pipe.H = rand() % (height_ - h + 1 - 6) + 3;
+  new_pipe.H = rand() % (height_ - h + 1 - 6) + 3 + 1;
   new_pipe.D = new_pipe.H + h;
 }
 
