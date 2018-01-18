@@ -32,6 +32,8 @@ class Game{
   bool HitPipe(const Pipe &p) const;
   double bird_y_, speed_y_;
   Pipe *pipes_;
+  int frame_count_;
+  double last10_time_;
   double start_time_, last_time_, fps_;
   int height_, width_, score_, pipe_count_;
 };

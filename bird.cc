@@ -69,7 +69,7 @@ int main() {
     WriteLeftSide(game, left_side);
     left_side.UpdateScreen();
     main_frame.UpdateScreen();
-    Sleep(30);
+    Sleep(25);
   }
   main_frame.WriteString(-1, kLines / 2 - 2, "-------------------------------");
   main_frame.WriteString(-1, kLines / 2 - 1, "|                             |");

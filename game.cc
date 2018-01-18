@@ -65,16 +65,21 @@ Game::~Game() {
 
 void Game::Init(double start_time) {
   srand(time(NULL));
-  start_time_ = last_time_ = start_time;
+  last10_time_ = start_time_ = last_time_ = start_time;
   fps_ = speed_y_ = .0;
-  score_ = pipe_count_ = 0;
+  frame_count_ = score_ = pipe_count_ = 0;
   bird_y_ = height_ * 0.15;
 }
 
 void Game::NextFrame(double current_time, int key, WinManager &manager) {
   double time_break = current_time - last_time_;
   last_time_ = current_time;
-  fps_ = 1.0 / time_break;
+  ++frame_count_;
+  if (frame_count_ == 10) {
+    fps_ = 10.0 / (current_time - last10_time_);
+    last10_time_ = current_time;
+    frame_count_ = 0;
+  }
   ClearBird(manager, bird_y_);
   double last_speed_y = speed_y_;
   if (key == ' ')
