@@ -1,6 +1,7 @@
-cc=g++ --static
+cc=g++ -static -g
 exe=FlappyBird
 obj=bird.o win_manager.o game.o
+headers=game.h win_manager.h
 
 $(exe):$(obj)
 	$(cc) -o $(exe) $(obj)

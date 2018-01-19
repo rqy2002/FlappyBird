@@ -1,5 +1,3 @@
-#include <conio.h>
-#include <windows.h>
 #include <ctime>
 #include <cstdio>
 #include <cstdlib>
@@ -9,7 +7,7 @@ const int kLines = 35;
 const int kColumns = 120;
 const int kLeftSideColumns = 20 + 1;
 char tmp[200];
-void InitLeftSide(WinManager &left_side) {
+void WriteLeftSide(const Game &game, WinManager &left_side) {
   left_side.WriteColumn(kLeftSideColumns - 1, 0, -1, '|');
   left_side.WriteString(0, 1, "Help:");
   left_side.WriteString(0, 2, " Press <Space> to");
@@ -18,37 +16,25 @@ void InitLeftSide(WinManager &left_side) {
   left_side.WriteString(0, 5, "ground or hit pipes");
   // Empty line
   left_side.WriteString(0, 7, "Time:");
-  // Time
-  left_side.WriteString(0, 9, "Fps:");
-  // Fps
-  // Empty line
-  left_side.WriteString(0, 12, "Score:");
-  // Score
-}
-void WriteLeftSide(const Game &game, WinManager &left_side) {
   sprintf(tmp, " %5.2lfs", game.get_time());
   left_side.WriteString(0, 8, tmp);
+  left_side.WriteString(0, 9, "Fps:");
   sprintf(tmp, " %5.2lf", game.get_fps());
   left_side.WriteString(0, 10, tmp);
+  // Empty line
+  left_side.WriteString(0, 12, "Score:");
   sprintf(tmp, " %3d", game.get_score());
   left_side.WriteString(0, 13, tmp);
 }
 double GetTime() {
   return static_cast<double> (clock()) / CLOCKS_PER_SEC;
 }
-inline void HideCursor() {
-  HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  CONSOLE_CURSOR_INFO cci;
-  GetConsoleCursorInfo(hOut,&cci);
-  cci.bVisible = FALSE;
-  SetConsoleCursorInfo(hOut,&cci);
-}
 void InitMenu(WinManager &main_frame) {
   main_frame.WriteString(-1, kLines / 2 - 1, "Flappy bird (Simple)");
   main_frame.WriteString(-1, kLines / 2, "--By _rqy");
   main_frame.WriteString(-1, kLines / 2 + 1, "Press any key to start...");
   main_frame.UpdateScreen();
-  _getch();
+  WaitKey();
   main_frame.WriteString(-1, kLines / 2 - 1, "                    ");
   main_frame.WriteString(-1, kLines / 2, "         ");
   main_frame.WriteString(-1, kLines / 2 + 1, "                         ");
@@ -60,20 +46,19 @@ int main() {
   WinManager left_side(0, kLines, 0, kLeftSideColumns);
   WinManager main_frame(0, kLines, kLeftSideColumns, kColumns);
   Game game(kLines, kColumns - kLeftSideColumns);
-  InitLeftSide(left_side);
-  left_side.UpdateScreen();
   InitMenu(main_frame);
   game.Init(GetTime());
   while (!game.CheckIfFail()) {
-    game.NextFrame(GetTime(), kbhit() ? _getch() : -1, main_frame);
+    double ti = GetTime();
+    game.NextFrame(ti, GetKey(), main_frame);
     WriteLeftSide(game, left_side);
     left_side.UpdateScreen();
     main_frame.UpdateScreen();
-    Sleep(25);
+    WaitUntil(ti + 0.020);
   }
   main_frame.WriteString(-1, kLines / 2 - 2, "-------------------------------");
   main_frame.WriteString(-1, kLines / 2 - 1, "|                             |");
-  main_frame.WriteString(-1, kLines / 2, "|                             |");
+  main_frame.WriteString(-1, kLines / 2 + 0, "|                             |");
   main_frame.WriteString(-1, kLines / 2 + 1, "|                             |");
   main_frame.WriteString(-1, kLines / 2 + 2, "|                             |");
   main_frame.WriteString(-1, kLines / 2 + 3, "-------------------------------");
@@ -81,6 +66,6 @@ int main() {
   main_frame.WriteString(-1, kLines / 2, tmp);
   main_frame.WriteString(-1, kLines / 2 + 1, "Press any key to exit...");
   main_frame.UpdateScreen();
-  _getch();
+  WaitKey();
   return 0;
 }

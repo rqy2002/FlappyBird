@@ -31,11 +31,24 @@ class WinManager{
   // UpdateScreen():
   // Update the map onto the screen.
   void UpdateScreen();
+  // Clear():
+  // Clear all contents in the block
+  void Clear();
  private:
   int left_, right_, up_, down_;
   char **map_;
   std::map<std::pair<int, int>, char> changes_;
   HANDLE out_handle_;
 };
+
+// Hide the cursor.
+void HideCursor();
+// Wait for a key
+int WaitKey();
+// If a key is perssed then returns the key; or returns -1 otherwise
+int GetKey();
+// Wait until a time
+void WaitUntil(double end);
+
 
 #endif // FLAPPYBIRD_WINMANAGE_H_

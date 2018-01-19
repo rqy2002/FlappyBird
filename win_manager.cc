@@ -1,7 +1,9 @@
 #include "win_manager.h"
 #include <conio.h>
 #include <windows.h>
+#include <cctype>
 #include <cstring>
+#include <ctime>
 #include <map>
 
 WinManager::WinManager(int up, int down, int left, int right)
@@ -55,4 +57,30 @@ void WinManager::UpdateScreen() {
     }
   }
   changes_.clear();
+}
+
+void WinManager::Clear() {
+  for (int i = 0, h = getHeight(); i < h; ++i)
+    WriteLine(0, -1, i, ' ');
+}
+
+void HideCursor() {
+  HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  CONSOLE_CURSOR_INFO cci;
+  GetConsoleCursorInfo(hOut, &cci);
+  cci.bVisible = FALSE;
+  SetConsoleCursorInfo(hOut, &cci);
+}
+
+int WaitKey() {
+  while (!kbhit());
+  return getch();
+}
+
+int GetKey() { return kbhit() ? getch() : -1; }
+
+void WaitUntil(double end) {
+  int wait = static_cast<int>(end * CLOCKS_PER_SEC) - clock();
+  if (wait > 0)
+    Sleep(wait);
 }
