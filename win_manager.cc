@@ -11,7 +11,10 @@ WinManager::WinManager(int up, int down, int left, int right)
   out_handle_ = GetStdHandle(STD_OUTPUT_HANDLE);
   int h = getHeight(), w = getWidth();
   map_ = new char *[h];
-  for (int i = 0; i < h; ++i) map_[i] = new char [w];
+  for (int i = 0; i < h; ++i) {
+    map_[i] = new char [w];
+    memset(map_[i], ' ', w * sizeof(char));
+  }
 }
 
 WinManager::~WinManager() {

@@ -56,6 +56,7 @@ void DrawPipe(WinManager &manager, const Pipe &pipe) {
 
 Game::Game(int height, int width)
     : height_(height), width_(width) {
+  high_score_ = 0;
   pipes_ = new Pipe[width / kPipeSpace + 5];
 }
 
@@ -98,6 +99,7 @@ void Game::NextFrame(double current_time, int key, WinManager &manager) {
       pipes_[new_pipe_count++] = pipes_[i];
     } else {
       ++score_;
+      high_score_ = std::max(high_score_, score_);
     }
   }
   pipe_count_ = new_pipe_count;
@@ -109,6 +111,7 @@ void Game::NextFrame(double current_time, int key, WinManager &manager) {
 }
 
 int Game::get_score() const { return score_; }
+int Game::get_high_score() const { return high_score_; }
 double Game::get_time() const { return last_time_ - start_time_; }
 double Game::get_fps() const { return fps_; }
 
@@ -128,13 +131,12 @@ void Game::NewPipe() {
 }
 
 bool Game::HitPipe(const Pipe &p) const {
-  int dx = toInt(kBirdX) - toInt(p.x);
-  dx = std::min(std::abs(dx), std::abs(dx - 1));
-  if (dx > 2)
+  int dx = toInt(p.x) - toInt(kBirdX);
+  if (dx > 2 || dx < -2)
     return false;
   else if (dx == 2)
     return bird_y_ <= p.H - 0.5 || bird_y_ >= p.D + 0.5;
-  else if (dx == 1)
+  else if (dx == 1 || dx == -2)
     return bird_y_ <= p.H + 0.5 || bird_y_ >= p.D - 0.5;
   else
     return bird_y_ <= p.H + 1.5 || bird_y_ >= p.D - 1.5;

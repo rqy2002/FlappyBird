@@ -1,3 +1,4 @@
+#include <cctype>
 #include <ctime>
 #include <cstdio>
 #include <cstdlib>
@@ -25,8 +26,11 @@ void WriteLeftSide(const Game &game, WinManager &left_side) {
   left_side.WriteString(0, 12, "Score:");
   sprintf(tmp, " %3d", game.get_score());
   left_side.WriteString(0, 13, tmp);
+  left_side.WriteString(0, 14, "High Score:");
+  sprintf(tmp, " %3d", game.get_high_score());
+  left_side.WriteString(0, 15, tmp);
 }
-double GetTime() {
+inline double GetTime() {
   return static_cast<double> (clock()) / CLOCKS_PER_SEC;
 }
 void InitMenu(WinManager &main_frame) {
@@ -35,9 +39,9 @@ void InitMenu(WinManager &main_frame) {
   main_frame.WriteString(-1, kLines / 2 + 1, "Press any key to start...");
   main_frame.UpdateScreen();
   WaitKey();
-  main_frame.WriteString(-1, kLines / 2 - 1, "                    ");
-  main_frame.WriteString(-1, kLines / 2, "         ");
-  main_frame.WriteString(-1, kLines / 2 + 1, "                         ");
+}
+inline int toUpper(char c) {
+  return islower(c) ? c + 'A' - 'a' : c;
 }
 int main() {
   sprintf(tmp, "mode con lines=%d cols=%d", kLines, kColumns);
@@ -47,25 +51,33 @@ int main() {
   WinManager main_frame(0, kLines, kLeftSideColumns, kColumns);
   Game game(kLines, kColumns - kLeftSideColumns);
   InitMenu(main_frame);
-  game.Init(GetTime());
-  while (!game.CheckIfFail()) {
-    double ti = GetTime();
-    game.NextFrame(ti, GetKey(), main_frame);
-    WriteLeftSide(game, left_side);
-    left_side.UpdateScreen();
+  while (true) {
+    main_frame.Clear();
+    game.Init(GetTime());
+    while (!game.CheckIfFail()) {
+      double ti = GetTime();
+      game.NextFrame(ti, GetKey(), main_frame);
+      WriteLeftSide(game, left_side);
+      left_side.UpdateScreen();
+      main_frame.UpdateScreen();
+      WaitUntil(ti + 0.020);
+    }
+    main_frame.WriteString(-1, kLines / 2 - 3, "-------------------------------");
+    main_frame.WriteString(-1, kLines / 2 - 2, "|                             |");
+    main_frame.WriteString(-1, kLines / 2 - 1, "|                             |");
+    main_frame.WriteString(-1, kLines / 2 + 0, "|                             |");
+    main_frame.WriteString(-1, kLines / 2 + 1, "|                             |");
+    main_frame.WriteString(-1, kLines / 2 + 2, "|                             |");
+    main_frame.WriteString(-1, kLines / 2 + 3, "-------------------------------");
+    sprintf(tmp, "Your score: %d!", game.get_score());
+    main_frame.WriteString(-1, kLines / 2 - 1, tmp);
+    main_frame.WriteString(-1, kLines / 2 + 0, "Press R to restart.");
+    main_frame.WriteString(-1, kLines / 2 + 1, "Press E to exit.");
     main_frame.UpdateScreen();
-    WaitUntil(ti + 0.020);
+    int c;
+    do c = toUpper(WaitKey()); while (c != 'E' && c != 'R');
+    if (c == 'E') break;
+    else continue;
   }
-  main_frame.WriteString(-1, kLines / 2 - 2, "-------------------------------");
-  main_frame.WriteString(-1, kLines / 2 - 1, "|                             |");
-  main_frame.WriteString(-1, kLines / 2 + 0, "|                             |");
-  main_frame.WriteString(-1, kLines / 2 + 1, "|                             |");
-  main_frame.WriteString(-1, kLines / 2 + 2, "|                             |");
-  main_frame.WriteString(-1, kLines / 2 + 3, "-------------------------------");
-  sprintf(tmp, "Your score: %d!", game.get_score());
-  main_frame.WriteString(-1, kLines / 2, tmp);
-  main_frame.WriteString(-1, kLines / 2 + 1, "Press any key to exit...");
-  main_frame.UpdateScreen();
-  WaitKey();
   return 0;
 }
