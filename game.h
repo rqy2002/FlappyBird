@@ -37,6 +37,7 @@ class Game{
   double last10_time_;
   double start_time_, last_time_, fps_;
   int height_, width_, score_, high_score_, pipe_count_;
+  bool paused_;
 };
 
 #endif // FLAPPYBIRD_GAME_H_

@@ -10,25 +10,29 @@ const int kLeftSideColumns = 20 + 1;
 char tmp[200];
 void WriteLeftSide(const Game &game, WinManager &left_side) {
   left_side.WriteColumn(kLeftSideColumns - 1, 0, -1, '|');
-  left_side.WriteString(0, 1, "Help:");
-  left_side.WriteString(0, 2, " Press <Space> to");
-  left_side.WriteString(0, 3, "make the bird fly.");
-  left_side.WriteString(0, 4, " Don't fall to the");
-  left_side.WriteString(0, 5, "ground or hit pipes");
-  // Empty line
-  left_side.WriteString(0, 7, "Time:");
+  int p = 0;
+  ++p; left_side.WriteString(0, p, "Keys:");
+  ++p; left_side.WriteString(0, p, " <Space>:");
+  ++p; left_side.WriteString(0, p, "  make the bird fly.");
+  ++p; left_side.WriteString(0, p, " P:");
+  ++p; left_side.WriteString(0, p, "  pause or continue.");
+  ++p; // Empty line
+  ++p; left_side.WriteString(0, p, " Don't fall to the");
+  ++p; left_side.WriteString(0, p, "ground or hit pipes");
+  ++p; // Empty line
+  ++p; left_side.WriteString(0, p, "Time:");
   sprintf(tmp, " %5.2lfs", game.get_time());
-  left_side.WriteString(0, 8, tmp);
-  left_side.WriteString(0, 9, "Fps:");
+  ++p; left_side.WriteString(0, p, tmp);
+  ++p; left_side.WriteString(0, p, "Fps:");
   sprintf(tmp, " %5.2lf", game.get_fps());
-  left_side.WriteString(0, 10, tmp);
-  // Empty line
-  left_side.WriteString(0, 12, "Score:");
+  ++p; left_side.WriteString(0, p, tmp);
+  ++p; // Empty line
+  ++p; left_side.WriteString(0, p, "Score:");
   sprintf(tmp, " %3d", game.get_score());
-  left_side.WriteString(0, 13, tmp);
-  left_side.WriteString(0, 14, "High Score:");
+  ++p; left_side.WriteString(0, p, tmp);
+  ++p; left_side.WriteString(0, p, "High Score:");
   sprintf(tmp, " %3d", game.get_high_score());
-  left_side.WriteString(0, 15, tmp);
+  ++p; left_side.WriteString(0, p, tmp);
 }
 inline double GetTime() {
   return static_cast<double> (clock()) / CLOCKS_PER_SEC;
