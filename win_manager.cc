@@ -6,18 +6,23 @@
 #include <ctime>
 #include <map>
 
-WinManager::WinManager(int up, int down, int left, int right)
-    : left_(left), right_(right), up_(up), down_(down) {
+WinManager::WinManager(int top, int bottom, int left, int right)
+    : left_(left), right_(right), top_(top), bottom_(bottom) {
   out_handle_ = GetStdHandle(STD_OUTPUT_HANDLE);
   int h = getHeight(), w = getWidth();
   map_ = new char *[h];
-  for (int i = 0; i < h; ++i) map_[i] = new char [w];
+  for (int i = 0; i < h; ++i) {
+    map_[i] = new char [w];
+    memset(map_[i], ' ', w * sizeof(char));
+  }
 }
 
 WinManager::~WinManager() {
+  Clear();
+  UpdateScreen();
   delete map_;
 }
-int WinManager::getHeight() { return down_ - up_; }
+int WinManager::getHeight() { return bottom_ - top_; }
 
 int WinManager::getWidth() { return right_ - left_; }
 
@@ -52,7 +57,7 @@ void WinManager::UpdateScreen() {
     if (map_[y][x] != c) {
       map_[y][x] = c;
       WriteConsoleOutputCharacter(out_handle_, &c, 1,
-                                  (COORD){left_ + x, up_ + y},
+                                  (COORD){left_ + x, top_ + y},
                                   &dword);
     }
   }

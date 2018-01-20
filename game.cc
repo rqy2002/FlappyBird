@@ -21,26 +21,12 @@ namespace {
 static inline int toInt(double x) {
   return static_cast<int> (x + 0.5);
 }
-void ClearBird(WinManager &manager, double bird_y) {
-  int x = toInt(kBirdX), y = toInt(bird_y);
-  manager.WriteCharacter(x, y - 1, ' ');
-  manager.WriteLine(x - 1, x + 1, y, ' ');
-  manager.WriteCharacter(x, y + 1, ' ');
-}
 
 void DrawBird(WinManager &manager, double bird_y) {
   int x = toInt(kBirdX), y = toInt(bird_y);
   manager.WriteCharacter(x, y - 1, 'v');
   manager.WriteLine(x - 1, x + 1, y, '>');
   manager.WriteCharacter(x, y + 1, '^');
-}
-
-void ClearPipe(WinManager &manager, const Pipe &pipe) {
-  int x = toInt(pipe.x);
-  manager.WriteColumn(x, 0, pipe.H, ' ');
-  manager.WriteColumn(x + 1, 0, pipe.H, ' ');
-  manager.WriteColumn(x, pipe.D, -1, ' ');
-  manager.WriteColumn(x + 1, pipe.D, -1, ' ');
 }
 
 void DrawPipe(WinManager &manager, const Pipe &pipe) {
@@ -56,6 +42,7 @@ void DrawPipe(WinManager &manager, const Pipe &pipe) {
 
 Game::Game(int height, int width)
     : height_(height), width_(width) {
+  high_score_ = 0;
   pipes_ = new Pipe[width / kPipeSpace + 5];
 }
 
@@ -65,6 +52,7 @@ Game::~Game() {
 
 void Game::Init(double start_time) {
   srand(time(NULL));
+  paused_ = false;
   last10_time_ = start_time_ = last_time_ = start_time;
   fps_ = speed_y_ = .0;
   frame_count_ = score_ = pipe_count_ = 0;
@@ -72,6 +60,8 @@ void Game::Init(double start_time) {
 }
 
 void Game::NextFrame(double current_time, int key, WinManager &manager) {
+  using std::max;
+  using std::min;
   double time_break = current_time - last_time_;
   last_time_ = current_time;
   ++frame_count_;
@@ -80,24 +70,31 @@ void Game::NextFrame(double current_time, int key, WinManager &manager) {
     last10_time_ = current_time;
     frame_count_ = 0;
   }
-  ClearBird(manager, bird_y_);
+  if (key == 'p' || key == 'P')
+    paused_ ^= 1;
+  if (paused_) {
+    manager.WriteString(-1, height_ / 2 - 1, "Pausing...");
+    manager.WriteString(-1, height_ / 2, "(Press P to Continue)");
+    return;
+  }
+  manager.Clear();
   double last_speed_y = speed_y_;
   if (key == ' ')
     last_speed_y = speed_y_ = kUpSpeedY;
   else
     speed_y_ += kGrivAcc * time_break;
   bird_y_ += 0.5 * (last_speed_y + speed_y_) * time_break;
-  bird_y_ = std::max(bird_y_, 1.0);
-  bird_y_ = std::min(bird_y_, height_ - 0.7);
+  bird_y_ = max(bird_y_, 1.0);
+  bird_y_ = min(bird_y_, height_ - 0.7);
   int new_pipe_count = 0;
   for (int i = 0; i < pipe_count_; ++i) {
-    ClearPipe(manager, pipes_[i]);
     pipes_[i].x -= kSpeedX * time_break;
     if (pipes_[i].x > 0) {
       DrawPipe(manager, pipes_[i]);
       pipes_[new_pipe_count++] = pipes_[i];
     } else {
       ++score_;
+      high_score_ = max(high_score_, score_);
     }
   }
   pipe_count_ = new_pipe_count;
@@ -109,6 +106,7 @@ void Game::NextFrame(double current_time, int key, WinManager &manager) {
 }
 
 int Game::get_score() const { return score_; }
+int Game::get_high_score() const { return high_score_; }
 double Game::get_time() const { return last_time_ - start_time_; }
 double Game::get_fps() const { return fps_; }
 
@@ -128,13 +126,12 @@ void Game::NewPipe() {
 }
 
 bool Game::HitPipe(const Pipe &p) const {
-  int dx = toInt(kBirdX) - toInt(p.x);
-  dx = std::min(std::abs(dx), std::abs(dx - 1));
-  if (dx > 2)
+  int dx = toInt(p.x) - toInt(kBirdX);
+  if (dx > 2 || dx < -2)
     return false;
   else if (dx == 2)
     return bird_y_ <= p.H - 0.5 || bird_y_ >= p.D + 0.5;
-  else if (dx == 1)
+  else if (dx == 1 || dx == -2)
     return bird_y_ <= p.H + 0.5 || bird_y_ >= p.D - 0.5;
   else
     return bird_y_ <= p.H + 1.5 || bird_y_ >= p.D - 1.5;
